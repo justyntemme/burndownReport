@@ -1,5 +1,7 @@
 import json
+import csv
 import logging
+import io
 import os
 import requests
 from typing import Tuple, Optional
@@ -8,8 +10,8 @@ logging.basicConfig(level=logging.INFO)
 
 TL_URL = os.environ.get("TL_URL")
 
-def getINCS(token: str):
-    auditsURL = TL_URL + "/api/v1/audits/runtime/container/download?limit=10"
+def getINCS(token: str) -> Tuple[int, str]:
+    auditsURL = TL_URL + "/api/v1/audits/runtime/container/download?limit=1"
     headers = {
         "accept": "application/json; charset=UTF-8",
         "content-type": "application/json",
@@ -19,8 +21,8 @@ def getINCS(token: str):
     response = requests.get(
         auditsURL, headers=headers, timeout=60, verify=False
     )
+    return(response.status_code, response.text)
 
-    print(response.content)
 
 def generateCwpToken(accessKey: str, accessSecret: str) -> Tuple[int, str]:
     authURL = TL_URL + "/api/v1/authenticate"
@@ -44,11 +46,27 @@ def generateCwpToken(accessKey: str, accessSecret: str) -> Tuple[int, str]:
 
     return response.status_code, ""
 
+def parseString(content: str) -> str:
+    fieldnames = ("Type","Attack","Container","Image","Hostname","Message","Rule","Effect","Custom Labels","Date","AttackTechniques")
+    reader = csv.DictReader(io.StringIO(content), fieldnames)
+    out = json.dumps([row for row in reader])
+    return out
+
+    
+
+
 def main():
     accessKey = os.environ.get("PC_IDENTITY")
     accessSecret = os.environ.get("PC_SECRET")
-    response, cwpToken = generateCwpToken(accessKey, accessSecret)
-    getINCS(cwpToken)
+    responseCode, cwpToken = generateCwpToken(accessKey, accessSecret)
+    responseCode, content = getINCS(cwpToken)
+    
+    jsonContent = parseString(content)
+
+    j = json.loads(jsonContent)
+    for item in j:
+        print(item)
+
 
 
 if __name__ == "__main__":
