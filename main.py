@@ -65,7 +65,14 @@ def parseString(content: str) -> str:
     return out
 
 
-def count_unique_values(json_list, keys):
+def count_unique_values(json_list):
+    keys = ['Type',
+        'Attack',
+        'Container',
+        'Image',
+        'Hostname',
+        'Rule"'
+        'AttackTechniques']
     # Initialize a dictionary to store counts for each key
     counts = {key: {} for key in keys}
 
@@ -93,9 +100,8 @@ def main():
     jsonContent = parseString(content)
 
     j = json.loads(jsonContent)
-    for item in j:
-        print(item)
-
+    result = count_unique_values(j)
+    print(result)
 
 if __name__ == "__main__":
     main()
