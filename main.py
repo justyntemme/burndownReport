@@ -64,6 +64,7 @@ def parseString(content: str) -> str:
         "AttackTechniques",
     )
     reader = csv.DictReader(io.StringIO(content), fieldnames)
+    next(reader, None)
     out = json.dumps([row for row in reader])
     return out
 
@@ -75,7 +76,7 @@ def count_unique_values(json_list) -> dict:
         "Container",
         "Image",
         "Hostname",
-        'Rule"',
+        "Rule",
         "AttackTechniques",
     ]
     # Initialize a dictionary to store counts for each key
@@ -106,13 +107,24 @@ def visualize_data(data):
     container_data = data["Container"]
     image_data = data["Image"]
     hostname_data = data["Hostname"]
+    rule_data = data["Rule"]
 
     # General font size for most plots
     general_font_size = 12
 
     # Specific font size for image and hostname plots
     specific_font_size = 8
-
+    # rule chart log
+    plt.figure(figsize=(10, 6))
+    sns.barplot(x=list(rule_data.keys()), y=list(rule_data.values()))
+    plt.yscale("log")
+    plt.title("Rule Distribution (Log Scale)", fontsize=general_font_size)
+    plt.xlabel("Rule", fontsize=general_font_size)
+    plt.ylabel("Count (Log Scale)", fontsize=general_font_size)
+    plt.xticks(rotation=45, fontsize=general_font_size)
+    plt.yticks(fontsize=general_font_size)
+    plt.tight_layout()
+    plt.show()
     # Figure for type distribution with log scale
     plt.figure(figsize=(10, 6))
     sns.barplot(x=list(type_data.keys()), y=list(type_data.values()))
